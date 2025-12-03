@@ -6642,7 +6642,7 @@
 				)
 			)
 		)
-		(property "Value" "4.7nF 2kV"
+		(property "Value" "1nF 2kV"
 			(at 0 1.850001 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -32408,7 +32408,7 @@
 				)
 			)
 		)
-		(property "Value" "4.7nF 2kV"
+		(property "Value" "1nF 2kV"
 			(at 0 1.850001 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -33989,7 +33989,7 @@
 				)
 			)
 		)
-		(property "Value" "10nF 2kV"
+		(property "Value" "1nF 2kV"
 			(at 0 1.850001 90)
 			(unlocked yes)
 			(layer "F.Fab")

@@ -35395,7 +35395,7 @@
 				)
 			)
 		)
-		(property "Value" "4.7nF 2kV"
+		(property "Value" "1nF 2kV"
 			(at 214.6363 350.52 90)
 			(effects
 				(font
@@ -52090,7 +52090,7 @@
 				)
 			)
 		)
-		(property "Value" "4.7nF 2kV"
+		(property "Value" "1nF 2kV"
 			(at 194.3163 350.52 90)
 			(effects
 				(font
@@ -54623,7 +54623,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "10nF 2kV"
+		(property "Value" "1nF 2kV"
 			(at 246.38 325.1263 0)
 			(effects
 				(font
