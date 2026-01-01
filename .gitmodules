@@ -1,0 +1,9 @@
+[submodule "software/firmware/main/FreeRTOS"]
+	path = software/firmware/main/FreeRTOS
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel
+[submodule "software/firmware/main/STM32CubeH7"]
+	path = software/firmware/main/STM32CubeH7
+	url = https://github.com/STMicroelectronics/STM32CubeH7
+[submodule "software/toolchains/stm32-cmake"]
+	path = software/toolchains/stm32-cmake
+	url = https://github.com/ObKo/stm32-cmake
