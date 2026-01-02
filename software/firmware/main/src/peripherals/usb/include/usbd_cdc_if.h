@@ -11,9 +11,9 @@ extern "C" {
 #define APP_TX_DATA_SIZE 2048
 
 /** CDC Interface callback. */
-extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
+extern USBD_CDC_ItfTypeDef USBD_Interface_fops_HS;
 
-uint8_t CDC_Transmit_FS(uint8_t *Buf, uint16_t Len);
+uint8_t CDC_Transmit_HS(uint8_t *Buf, uint16_t Len);
 
 void transmit_complete_callback(void);
 

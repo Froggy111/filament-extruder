@@ -6,8 +6,8 @@
 #include "usbd_desc.h"
 
 /* USB Device Core handle declaration. */
-USBD_HandleTypeDef hUsbDeviceFS;
-extern USBD_DescriptorsTypeDef CDC_Desc;
+USBD_HandleTypeDef hUsbDeviceHS;
+extern USBD_DescriptorsTypeDef HS_Desc;
 
 /**
  * Init USB device Library, add supported class and start the library
@@ -15,17 +15,17 @@ extern USBD_DescriptorsTypeDef CDC_Desc;
  */
 USBD_StatusTypeDef MX_USB_Device_Init(void) {
     /* Init Device Library, add supported class and start the library. */
-    if (USBD_Init(&hUsbDeviceFS, &CDC_Desc, DEVICE_FS) != USBD_OK) {
+    if (USBD_Init(&hUsbDeviceHS, &HS_Desc, DEVICE_FS) != USBD_OK) {
         return USBD_FAIL;
     }
-    if (USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC) != USBD_OK) {
+    if (USBD_RegisterClass(&hUsbDeviceHS, &USBD_CDC) != USBD_OK) {
         return USBD_FAIL;
     }
-    if (USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS) !=
+    if (USBD_CDC_RegisterInterface(&hUsbDeviceHS, &USBD_Interface_fops_HS) !=
         USBD_OK) {
         return USBD_FAIL;
     }
-    if (USBD_Start(&hUsbDeviceFS) != USBD_OK) {
+    if (USBD_Start(&hUsbDeviceHS) != USBD_OK) {
         return USBD_FAIL;
     }
     HAL_PWREx_EnableUSBVoltageDetector();

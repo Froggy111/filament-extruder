@@ -9,6 +9,8 @@ extern "C" {
 #include "stm32h7xx_hal.h"
 #include "usbd_def.h"
 
+extern USBD_HandleTypeDef hUsbDeviceHS;
+
 /** USB Device initialization function. */
 USBD_StatusTypeDef MX_USB_Device_Init(void);
 
