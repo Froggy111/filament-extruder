@@ -2,17 +2,19 @@ set(CUSTOM_LIBS
 error
 clock
 gpio
+usb
+debug_
 )
 
-# add_subdirectory(configs)
-# list(APPEND COMMON_LIBS configs)
+add_subdirectory(configs)
+list(APPEND COMMON_LIBS configs)
 
 message(STATUS "COMMON_LIBS: ${COMMON_LIBS}")
 message(STATUS "INCLUDE_DIRS: ${INCLUDE_DIRS}")
 message(STATUS "CUSTOM_LIBS: ${CUSTOM_LIBS}")
 
 add_subdirectory(clock)
-# add_subdirectory(debug)
+add_subdirectory(debug)
 add_subdirectory(error)
 add_subdirectory(peripherals)
 # add_subdirectory(encoder)

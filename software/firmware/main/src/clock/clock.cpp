@@ -13,21 +13,14 @@ void clock::init() {
         error::handler();
     }
     // VOS0 for 550MHz
-    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE0) !=
-        HAL_OK) {
-        error::handler();
-    }
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
     // wait until voltage scaling is ready
     while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {
     }
 
     // HSE (using)
-    osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI48 | RCC_OSCILLATORTYPE_HSE;
+    osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     osc_init.HSEState = RCC_HSE_ON;
-
-    // HSI48
-    osc_init.HSI48State = RCC_HSI48_ON;
-
     // PLL1
     osc_init.PLL.PLLState = RCC_PLL_ON;
     osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSE;
@@ -57,12 +50,12 @@ void clock::init() {
                          RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 |
                          RCC_CLOCKTYPE_D3PCLK1 | RCC_CLOCKTYPE_D1PCLK1;
     clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    clk_init.SYSCLKDivider = 1;               // CPU = 550MHz
-    clk_init.AHBCLKDivider = RCC_HCLK_DIV2;   // AHB = 275MHz
-    clk_init.APB1CLKDivider = RCC_APB1_DIV2;  // APB1 = 137.5MHz
-    clk_init.APB2CLKDivider = RCC_APB2_DIV2;  // APB2 = 137.5MHz
-    clk_init.APB3CLKDivider = RCC_APB3_DIV2;  // APB3 = 137.5MHz
-    clk_init.APB4CLKDivider = RCC_APB4_DIV2;  // APB4 = 137.5MHz
+    clk_init.SYSCLKDivider = RCC_SYSCLK_DIV1;  // CPU = 550MHz
+    clk_init.AHBCLKDivider = RCC_HCLK_DIV2;    // AHB = 275MHz
+    clk_init.APB1CLKDivider = RCC_APB1_DIV2;   // APB1 = 137.5MHz
+    clk_init.APB2CLKDivider = RCC_APB2_DIV2;   // APB2 = 137.5MHz
+    clk_init.APB3CLKDivider = RCC_APB3_DIV2;   // APB3 = 137.5MHz
+    clk_init.APB4CLKDivider = RCC_APB4_DIV2;   // APB4 = 137.5MHz
 
     // VOS0, 275MHz AXI clk, need 3 wait states
     if (HAL_RCC_ClockConfig(&clk_init, FLASH_LATENCY_3) != HAL_OK) {

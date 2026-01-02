@@ -5,7 +5,7 @@
 extern "C" {
 
 /* External variables --------------------------------------------------------*/
-extern PCD_HandleTypeDef hpcd_USB_FS;
+extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 
 /******************************************************************************/
 /*           Cortex-M4 Processor Interruption and Exception Handlers          */
@@ -65,12 +65,19 @@ void DebugMon_Handler(void) {}
 /**
  * @brief This function handles USB low priority interrupt remap.
  */
-void USB_LP_IRQHandler(void) { HAL_PCD_IRQHandler(&hpcd_USB_FS); }
+// void USB_LP_IRQHandler(void) { HAL_PCD_IRQHandler(&hpcd_USB_FS); }
+void OTG_HS_IRQHandler(void) { HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS); }
 
 /**
  * @brief This function handles TIM2 Systick interrupt.
  */
 void TIM2_IRQHandler(void) { clock::systick_handler(); }
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *timer) {
+    if (timer->Instance == TIM2) {
+        HAL_IncTick();
+    }
+}
 
 /**
  * @brief This function handles EXTI line0 interrupt.

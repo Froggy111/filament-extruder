@@ -7,13 +7,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// #if STDIO_TARGET == STDIO_USB
-// #include "usb.hpp"
-// #elif STDIO_TARGET == STDIO_SWO
-// #include "swo.hpp"
-// #elif STDIO_TARGET == STDIO_UART
-// #include "uart.hpp"
-// #endif
+#include "config.hpp"
+
+#if STDIO_TARGET == STDIO_USB
+#include "usb.hpp"
+#elif STDIO_TARGET == STDIO_SWO
+#include "swo.hpp"
+#elif STDIO_TARGET == STDIO_UART
+#include "uart.hpp"
+#endif
 
 extern "C" {
 

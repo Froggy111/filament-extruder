@@ -28,5 +28,6 @@ USBD_StatusTypeDef MX_USB_Device_Init(void) {
     if (USBD_Start(&hUsbDeviceFS) != USBD_OK) {
         return USBD_FAIL;
     }
+    HAL_PWREx_EnableUSBVoltageDetector();
     return USBD_OK;
 }

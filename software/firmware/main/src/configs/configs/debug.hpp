@@ -4,7 +4,7 @@
  * @brief Target for stdio functions (printf)
  * @options USB, CANFD, UART, SWO
  */
-#define STDIO_TARGET STDIO_UART
+#define STDIO_TARGET STDIO_USB
 #define STDIO_NULL 0
 #define STDIO_USB 1
 #define STDIO_CANFD 2
@@ -16,13 +16,13 @@
  */
 // #ifndef NDEBUG
 
-// #define DEBUG_ENABLED
-// #define DEBUG_LEVEL_TRACE
-// #define DEBUG_LEVEL_DEBUG
-// #define DEBUG_LEVEL_LOG
-// #define DEBUG_LEVEL_NOTE
-// #define DEBUG_LEVEL_WARN
-// #define DEBUG_LEVEL_ERROR
-// #define DEBUG_LEVEL_FATAL
+#define DEBUG_ENABLED
+#define DEBUG_LEVEL_TRACE
+#define DEBUG_LEVEL_DEBUG
+#define DEBUG_LEVEL_LOG
+#define DEBUG_LEVEL_NOTE
+#define DEBUG_LEVEL_WARN
+#define DEBUG_LEVEL_ERROR
+#define DEBUG_LEVEL_FATAL
 
 // #endif

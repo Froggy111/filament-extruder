@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gpio.hpp"
+
 /**
  * @brief USB CDC settings
  */

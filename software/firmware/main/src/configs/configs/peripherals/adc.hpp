@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stm32g4xx_hal.h>
+#include <stm32h7xx_hal.h>
 
 #include "gpio.hpp"
 

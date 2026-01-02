@@ -8,7 +8,9 @@
 #include <cmath>
 
 #include "clock.hpp"
+#include "debug.hpp"
 #include "gpio.hpp"
+#include "usb.hpp"
 
 void main_task(void *args);
 
@@ -31,11 +33,14 @@ void main_task([[maybe_unused]] void *args) {
     gpio::init(LED, gpio::Mode::OUTPUT_PP_, gpio::Pull::NOPULL,
                gpio::Speed::LOW);
     gpio::write(LED, 1);
+    usb::init();
 
     vTaskDelay(pdMS_TO_TICKS(100));
 
     for (;;) {
         gpio::invert(LED);
+        // HAL_Delay(1);
+        debug::debug("Hello World!");
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
