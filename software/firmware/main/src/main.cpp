@@ -43,7 +43,7 @@ void main_task([[maybe_unused]] void *args) {
 
     fan_ssr::InitStatus fan_ssr_init_status =
         fan_ssr::init(fan_ssr::Mode::FAN, 50.0f, fan_ssr::Mode::FAN, 50.0f,
-                      fan_ssr::Mode::FAN, 50.0f);
+                      fan_ssr::Mode::FAN, 50.0f, 0.25f);
     switch (fan_ssr_init_status) {
         case fan_ssr::InitStatus::BLOCK1_FREQ_OUT_OF_RANGE:
         case fan_ssr::InitStatus::BLOCK2_FREQ_OUT_OF_RANGE:
@@ -84,8 +84,6 @@ void main_task([[maybe_unused]] void *args) {
     } else {
         debug::debug("FAN/SSR enable port successful");
     };
-    fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 1.0f);
-    vTaskDelay(500);
 
     float duty_cycle = 0.0f;
     bool up = true;
@@ -103,7 +101,7 @@ void main_task([[maybe_unused]] void *args) {
             up = true;
         }
         gpio::invert(LED);
-        fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 1.0f);
+        fan_ssr::set_duty_cycle(fan_ssr::Port::P5, duty_cycle);
         // HAL_Delay(1);
         debug::debug("Hello World!");
         vTaskDelay(pdMS_TO_TICKS(100));

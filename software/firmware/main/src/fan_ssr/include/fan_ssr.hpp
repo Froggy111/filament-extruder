@@ -45,7 +45,8 @@ enum class InitStatus : uint8_t {
 };
 
 InitStatus init(Mode block_1_mode, float block_1_freq, Mode block_2_mode,
-                float block_2_freq, Mode block_3_mode, float block_3_freq);
+                float block_2_freq, Mode block_3_mode, float block_3_freq,
+                float fan_off_below);
 bool enable_port(Port port);
 bool disable_port(Port port);
 bool set_duty_cycle(Port port, float duty_cycle);

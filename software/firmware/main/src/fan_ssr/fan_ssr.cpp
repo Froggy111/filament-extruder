@@ -65,6 +65,7 @@ const PortConfig port_configs[12] = {
 };
 static PortData port_data[12] = {};
 static TIM_HandleTypeDef timers[3] = {{}, {}, {}};
+static float fan_off_below = 0.0f;
 
 bool freq_in_range(fan_ssr::Mode mode, float freq) {
     switch (mode) {
@@ -90,7 +91,9 @@ BlockInitStatus init_block(fan_ssr::Mode mode, float freq, uint8_t block_idx);
 
 fan_ssr::InitStatus fan_ssr::init(Mode block1_mode, float block1_freq,
                                   Mode block2_mode, float block2_freq,
-                                  Mode block3_mode, float block3_freq) {
+                                  Mode block3_mode, float block3_freq,
+                                  float fan_off_below_) {
+    fan_off_below = fan_off_below_;
     BlockInitStatus block1_status = init_block(block1_mode, block1_freq, 0);
     switch (block1_status) {
         case BlockInitStatus::OK:
@@ -178,6 +181,9 @@ bool fan_ssr::disable_port(Port port) {
 bool fan_ssr::set_duty_cycle(Port port, float duty_cycle) {
     if (duty_cycle < 0.0f || duty_cycle > 1.0f) {
         return false;
+    }
+    if (duty_cycle < fan_off_below) {
+        duty_cycle = 0.0f;
     }
     uint8_t port_idx = (uint8_t)port;
     uint8_t block_idx = port_idx / 4;
