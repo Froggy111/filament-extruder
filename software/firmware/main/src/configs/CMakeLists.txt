@@ -4,7 +4,11 @@ target_sources(configs
 PUBLIC
     config.hpp
 
+    configs/clock.hpp
     configs/debug.hpp
+    configs/encoder.hpp
+    configs/fan_ssr.hpp
+    configs/peripherals.hpp
 
     configs/encoder.hpp
     configs/encoder/ABZ.hpp

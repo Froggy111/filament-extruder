@@ -1,5 +1,6 @@
 add_subdirectory(gpio)
 add_subdirectory(msp)
+add_subdirectory(mpu)
 add_subdirectory(usb)
 # add_subdirectory(adc)
 # add_subdirectory(spi)

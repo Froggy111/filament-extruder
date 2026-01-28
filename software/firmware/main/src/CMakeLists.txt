@@ -4,6 +4,8 @@ clock
 gpio
 usb
 debug_
+mpu
+fan_ssr
 )
 
 add_subdirectory(configs)
@@ -16,6 +18,7 @@ message(STATUS "CUSTOM_LIBS: ${CUSTOM_LIBS}")
 add_subdirectory(clock)
 add_subdirectory(debug)
 add_subdirectory(error)
+add_subdirectory(fan_ssr)
 add_subdirectory(peripherals)
 # add_subdirectory(encoder)
 # add_subdirectory(inverter)

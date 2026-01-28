@@ -9,40 +9,18 @@
 
 #include "clock.hpp"
 #include "debug.hpp"
+#include "error.hpp"
+#include "fan_ssr.hpp"
 #include "gpio.hpp"
+#include "mpu.hpp"
 #include "usb.hpp"
 
 void main_task(void *args);
 
 gpio::PinConfig LED = {GPIOA, gpio::Pin::PIN15, gpio::AF::NONE};
 
-void MPU_Config(void) {
-    MPU_Region_InitTypeDef MPU_InitStruct = {0};
-
-    /* Disables the MPU */
-    HAL_MPU_Disable();
-
-    /** Initializes and configures the Region and the memory to be protected
-     */
-    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-    MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-    MPU_InitStruct.BaseAddress = 0x0;
-    MPU_InitStruct.Size = MPU_REGION_SIZE_4GB;
-    MPU_InitStruct.SubRegionDisable = 0x87;
-    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
-    MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
-    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
-    MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-    MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
-    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
-
-    HAL_MPU_ConfigRegion(&MPU_InitStruct);
-    /* Enables the MPU */
-    HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
-}
-
 int main(void) {
-    MPU_Config();
+    mpu::init();
     HAL_Init();
     clock::init();
 
@@ -63,8 +41,69 @@ void main_task([[maybe_unused]] void *args) {
 
     vTaskDelay(pdMS_TO_TICKS(100));
 
+    fan_ssr::InitStatus fan_ssr_init_status =
+        fan_ssr::init(fan_ssr::Mode::FAN, 50.0f, fan_ssr::Mode::FAN, 50.0f,
+                      fan_ssr::Mode::FAN, 50.0f);
+    switch (fan_ssr_init_status) {
+        case fan_ssr::InitStatus::BLOCK1_FREQ_OUT_OF_RANGE:
+        case fan_ssr::InitStatus::BLOCK2_FREQ_OUT_OF_RANGE:
+        case fan_ssr::InitStatus::BLOCK3_FREQ_OUT_OF_RANGE:
+            debug::error("FAN/SSR frequency out of range");
+            break;
+        case fan_ssr::InitStatus::BLOCK1_FREQ_DEVIATION_TOO_LARGE:
+        case fan_ssr::InitStatus::BLOCK2_FREQ_DEVIATION_TOO_LARGE:
+        case fan_ssr::InitStatus::BLOCK3_FREQ_DEVIATION_TOO_LARGE:
+            debug::error("FAN/SSR frequency deviation too large");
+            break;
+        case fan_ssr::InitStatus::BLOCK1_RESOLUTION_TOO_LOW:
+        case fan_ssr::InitStatus::BLOCK2_RESOLUTION_TOO_LOW:
+        case fan_ssr::InitStatus::BLOCK3_RESOLUTION_TOO_LOW:
+            debug::error("FAN/SSR resolution too low");
+            break;
+        case fan_ssr::InitStatus::BLOCK1_FREQ_TARGET_INVALID:
+        case fan_ssr::InitStatus::BLOCK2_FREQ_TARGET_INVALID:
+        case fan_ssr::InitStatus::BLOCK3_FREQ_TARGET_INVALID:
+            debug::error("FAN/SSR frequency target invalid");
+            break;
+        case fan_ssr::InitStatus::HAL_ERR:
+            debug::error("FAN/SSR HAL error");
+            break;
+        case fan_ssr::InitStatus::OK:
+            debug::debug("FAN/SSR initialisation successful");
+            break;
+    }
+    if (fan_ssr_init_status != fan_ssr::InitStatus::OK) {
+        vTaskDelay(5000);
+        error::handler();
+    }
+
+    if (!fan_ssr::enable_port(fan_ssr::Port::P5)) {
+        debug::error("FAN/SSR enable port error");
+        vTaskDelay(5000);
+        error::handler();
+    } else {
+        debug::debug("FAN/SSR enable port successful");
+    };
+    fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 1.0f);
+    vTaskDelay(500);
+
+    float duty_cycle = 0.0f;
+    bool up = true;
     for (;;) {
+        if (up) {
+            duty_cycle += 0.05f;
+        } else {
+            duty_cycle -= 0.05f;
+        }
+        if (duty_cycle > 1.0f) {
+            duty_cycle -= 0.05f;
+            up = false;
+        } else if (duty_cycle < 0.0f) {
+            duty_cycle += 0.05f;
+            up = true;
+        }
         gpio::invert(LED);
+        fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 1.0f);
         // HAL_Delay(1);
         debug::debug("Hello World!");
         vTaskDelay(pdMS_TO_TICKS(100));
