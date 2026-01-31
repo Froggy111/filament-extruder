@@ -8,6 +8,7 @@ PUBLIC
     configs/debug.hpp
     configs/encoder.hpp
     configs/fan_ssr.hpp
+    configs/stepper.hpp
     configs/peripherals.hpp
 
     configs/encoder.hpp

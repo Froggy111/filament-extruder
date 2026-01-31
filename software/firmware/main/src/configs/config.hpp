@@ -10,3 +10,4 @@
 #include "configs/encoder.hpp"
 #include "configs/fan_ssr.hpp"
 #include "configs/peripherals.hpp"
+#include "configs/stepper.hpp"

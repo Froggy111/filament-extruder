@@ -1,20 +1,20 @@
-add_library(fan_ssr)
+add_library(stepper)
 
-target_sources(fan_ssr
+target_sources(stepper
 PRIVATE
-    fan_ssr.cpp
+    stepper.cpp
 PUBLIC
-    include/fan_ssr.hpp
+    include/stepper.hpp
 )
 
-target_include_directories(fan_ssr
+target_include_directories(stepper
 PRIVATE
     ${INCLUDE_DIRS}
 PUBLIC
     include/
 )
 
-target_link_libraries(fan_ssr
+target_link_libraries(stepper
 PUBLIC
     ${COMMON_LIBS}
     gpio

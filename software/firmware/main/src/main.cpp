@@ -13,11 +13,28 @@
 #include "fan_ssr.hpp"
 #include "gpio.hpp"
 #include "mpu.hpp"
+#include "stepper.hpp"
 #include "usb.hpp"
 
 void main_task(void *args);
 
 gpio::PinConfig LED = {GPIOA, gpio::Pin::PIN15, gpio::AF::NONE};
+
+stepper::Config stepper1_conf = {250000,
+                                 20,
+                                 200,
+                                 stepper::MicroSteps::MS8,
+                                 stepper::Direction::NONINVERTED,
+                                 0.1f,
+                                 0.1f,
+                                 stepper::ChopperMode::stealthchop,
+                                 10000.0f,
+                                 false,
+                                 0,
+                                 10.0f,
+                                 0.0f,
+                                 0.0f};
+stepper::Config stepper2_conf = stepper1_conf;
 
 int main(void) {
     mpu::init();
@@ -77,6 +94,19 @@ void main_task([[maybe_unused]] void *args) {
         error::handler();
     }
 
+    stepper::InitStatus stepper_init_status =
+        stepper::init(stepper1_conf, stepper2_conf);
+    switch (stepper_init_status) {
+        case stepper::InitStatus::OK:
+            debug::debug("stepper initialisation successful");
+            break;
+    }
+    if (stepper_init_status != stepper::InitStatus::OK) {
+        debug::error("stepper initialisation unsuccessful");
+        vTaskDelay(5000);
+        error::handler();
+    }
+
     if (!fan_ssr::enable_port(fan_ssr::Port::P5)) {
         debug::error("FAN/SSR enable port error");
         vTaskDelay(5000);
@@ -84,6 +114,8 @@ void main_task([[maybe_unused]] void *args) {
     } else {
         debug::debug("FAN/SSR enable port successful");
     };
+
+    stepper::enable(stepper::Port::P1);
 
     float duty_cycle = 0.0f;
     bool up = true;
@@ -101,9 +133,13 @@ void main_task([[maybe_unused]] void *args) {
             up = true;
         }
         gpio::invert(LED);
-        fan_ssr::set_duty_cycle(fan_ssr::Port::P5, duty_cycle);
+        fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 0.0f);
         // HAL_Delay(1);
         debug::debug("Hello World!");
+        for (int i = 0; i < 10000; i++) {
+            stepper::step(stepper::Port::P1);
+            vTaskDelay(1);
+        }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

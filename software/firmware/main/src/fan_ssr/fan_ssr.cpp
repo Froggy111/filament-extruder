@@ -261,7 +261,7 @@ BlockInitStatus init_block(fan_ssr::Mode mode, float freq, uint8_t block_idx) {
         __HAL_TIM_ENABLE_OCxPRELOAD(&timers[block_idx],
                                     port_configs[i].channel);
         gpio::init(port_configs[i].pin, gpio::Mode::AF_PP, gpio::Pull::NOPULL,
-                   gpio::Speed::MEDIUM);
+                   gpio::Speed::LOW);
         // store initialised parameters to port data
         port_data[i] = {port_configs[i],    mode,
                         State::DISABLED,    freq_params.frequency,
