@@ -16,6 +16,8 @@ const gpio::PinConfig STEPPER1_INDEX = {GPIOB, gpio::Pin::PIN8, gpio::AF::NONE};
 const gpio::PinConfig STEPPER1_DIAG = {GPIOB, gpio::Pin::PIN9, gpio::AF::NONE};
 const uint8_t STEPPER1_ADDR = 0x00;
 const float STEPPER1_SHUNT_RESISTANCE = 0.100f;  // 100mOhm
+#define STEPPER1_TIMER TIM12
+const uint32_t STEPPER1_TIMER_FREQ = 10e6;  // Hz
 
 #define STEPPER2_UART USART10
 const gpio::PinConfig STEPPER2_TX = {GPIOE, gpio::Pin::PIN3,
@@ -29,3 +31,5 @@ const gpio::PinConfig STEPPER2_INDEX = {GPIOE, gpio::Pin::PIN4, gpio::AF::NONE};
 const gpio::PinConfig STEPPER2_DIAG = {GPIOE, gpio::Pin::PIN5, gpio::AF::NONE};
 const uint8_t STEPPER2_ADDR = 0x00;
 const float STEPPER2_SHUNT_RESISTANCE = 0.100f;  // 100mOhm
+#define STEPPER2_TIMER TIM13
+const uint32_t STEPPER2_TIMER_FREQ = 10e6;  // Hz

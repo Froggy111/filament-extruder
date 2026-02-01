@@ -80,6 +80,8 @@ enum class InitStatus : uint8_t {
     STEPPER2_READ_IFCNT_RECV_CRC_MISMATCH,
     STEPPER1_IFCNT_MISMATCH,
     STEPPER2_IFCNT_MISMATCH,
+    STEPPER1_TIM_INIT_FAILED,
+    STEPPER2_TIM_INIT_FAILED,
 };
 
 InitStatus init(Config stepper1_config, Config stepper2_config);
@@ -87,5 +89,16 @@ InitStatus init(Config stepper1_config, Config stepper2_config);
 void enable(Port stepper);
 void disable(Port stepper);
 void step(Port stepper);
+void set_velocity(Port stepper, float velocity);
+// this is in rotations/second, not radians
+void set_angular_velocity(Port stepper, float angular_velocity);
+void move(Port stepper, float position, float velocity);
+void stop(Port stepper);
+
+// used in core_interrupts.cpp
+void stepper1_irq_handler(void);
+void stepper1_hal_irq(void);
+void stepper2_irq_handler(void);
+void stepper2_hal_irq(void);
 
 }  // namespace stepper

@@ -1,6 +1,8 @@
 #include <stm32h7xx_hal.h>
 
 #include "clock.hpp"
+#include "config.hpp"
+#include "stepper.hpp"
 
 extern "C" {
 
@@ -73,10 +75,28 @@ void OTG_HS_IRQHandler(void) { HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS); }
  */
 void TIM2_IRQHandler(void) { clock::systick_handler(); }
 
+void TIM8_BRK_TIM12_IRQHandler(void) {
+    if (STEPPER1_TIMER == TIM12) {
+        stepper::stepper1_hal_irq();
+    }
+    return;
+}
+void TIM8_UP_TIM13_IRQHandler(void) {
+    if (STEPPER2_TIMER == TIM13) {
+        stepper::stepper2_hal_irq();
+    }
+    return;
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *timer) {
     if (timer->Instance == TIM2) {
         HAL_IncTick();
+    } else if (timer->Instance == STEPPER1_TIMER) {
+        stepper::stepper1_irq_handler();
+    } else if (timer->Instance == STEPPER2_TIMER) {
+        stepper::stepper2_irq_handler();
     }
+    return;
 }
 
 /**

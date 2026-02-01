@@ -31,7 +31,7 @@ stepper::Config stepper1_conf = {250000,
                                  10000.0f,
                                  false,
                                  0,
-                                 10.0f,
+                                 10000.0f,
                                  0.0f,
                                  0.0f};
 stepper::Config stepper2_conf = stepper1_conf;
@@ -136,10 +136,15 @@ void main_task([[maybe_unused]] void *args) {
         fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 0.0f);
         // HAL_Delay(1);
         debug::debug("Hello World!");
-        for (int i = 0; i < 10000; i++) {
-            stepper::step(stepper::Port::P1);
-            vTaskDelay(1);
+        if (up) {
+            stepper::set_angular_velocity(stepper::Port::P1, 1.0f);
+        } else {
+            stepper::set_angular_velocity(stepper::Port::P1, -1.0f);
         }
+        // for (int i = 0; i < 10000; i++) {
+        //     stepper::step(stepper::Port::P1);
+        //     vTaskDelay(1);
+        // }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

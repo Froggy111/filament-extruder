@@ -11,10 +11,6 @@
 #include "debug.hpp"
 #include "gpio.hpp"
 
-struct StepperState {
-    int32_t step_count = 0;
-    float velocity = 0.0f;
-};
 struct HardwareConfig {
     USART_TypeDef* UART = nullptr;
     gpio::PinConfig TX = {};
@@ -26,7 +22,10 @@ struct HardwareConfig {
     gpio::PinConfig DIAG = {};
     uint8_t address = 0;
     float shunt_resistance = 0.1f;
+    TIM_TypeDef* timer = nullptr;
+    uint32_t timer_frequency = 0;
 };
+
 enum class ReadRegStatus : uint8_t {
     OK,
     REQ_HAL_ERROR,
@@ -56,16 +55,32 @@ enum class LoadConfStatus : uint8_t {
     READ_IFCNT_RECV_CRC_MISMATCH,
     IFCNT_MISMATCH,
 };
+
+enum class MoveCommandState : uint8_t {
+    NONE,
+    POSITION,
+    VELOCITY,
+};
+struct StepperState {
+    MoveCommandState command_state = MoveCommandState::NONE;
+    int32_t current_position = 0;
+    int32_t target_position = 0;
+    int32_t target_velocity = 0;
+    bool step_pin_high = false;
+};
+
 const HardwareConfig hw_configs[2] = {
     {STEPPER1_UART, STEPPER1_TX, STEPPER1_RX, STEPPER1_DIR, STEPPER1_STEP,
      STEPPER1_ENN, STEPPER1_INDEX, STEPPER1_DIAG, STEPPER1_ADDR,
-     STEPPER1_SHUNT_RESISTANCE},
+     STEPPER1_SHUNT_RESISTANCE, STEPPER1_TIMER, STEPPER1_TIMER_FREQ},
     {STEPPER2_UART, STEPPER2_TX, STEPPER2_RX, STEPPER2_DIR, STEPPER2_STEP,
      STEPPER2_ENN, STEPPER2_INDEX, STEPPER2_DIAG, STEPPER2_ADDR,
-     STEPPER2_SHUNT_RESISTANCE}};
+     STEPPER2_SHUNT_RESISTANCE, STEPPER1_TIMER, STEPPER1_TIMER_FREQ}};
+
 static stepper::Config configs[2] = {{}, {}};
 static StepperState state[2] = {{}, {}};
 static UART_HandleTypeDef UARTs[2] = {{}, {}};
+static TIM_HandleTypeDef timers[2] = {{}, {}};
 
 // register addresses
 namespace reg {
@@ -174,7 +189,10 @@ bool write_reg(uint8_t idx, uint8_t addr, uint32_t data);
 ReadRegReturn read_reg(uint8_t idx, uint8_t addr);
 uint16_t usteps_to_val(stepper::MicroSteps usteps);
 LoadConfStatus load_config(uint8_t idx);
-void flush_uart_rx(uint8_t idx);
+bool init_timer(uint8_t idx);
+void enable_irq(uint8_t idx);
+void disable_irq(uint8_t idx);
+void irq_handler(uint8_t idx);
 
 stepper::InitStatus stepper::init(Config stepper1_config,
                                   Config stepper2_config) {
@@ -290,6 +308,13 @@ stepper::InitStatus stepper::init(Config stepper1_config,
     //         return InitStatus::STEPPER2_IFCNT_MISMATCH;
     // }
 
+    if (!init_timer(0)) {
+        return InitStatus::STEPPER1_TIM_INIT_FAILED;
+    }
+    if (!init_timer(1)) {
+        return InitStatus::STEPPER2_TIM_INIT_FAILED;
+    }
+
     return InitStatus::OK;
 }
 
@@ -309,6 +334,58 @@ void stepper::step(Port stepper) {
         __NOP();
     }
     gpio::write(hw_configs[idx].STEP, gpio::LOW);
+}
+
+void stepper::set_velocity(Port stepper, float velocity) {
+    uint8_t idx = (uint8_t)stepper;
+    float angular_velocity = velocity / configs[idx].rotation_distance;
+    set_angular_velocity(stepper, angular_velocity);
+    return;
+}
+void stepper::set_angular_velocity(Port stepper, float angular_velocity) {
+    uint8_t idx = (uint8_t)stepper;
+    state[idx].target_velocity = angular_velocity *
+                                 configs[idx].steps_per_rotation *
+                                 usteps_to_val(configs[idx].microsteps);
+    state[idx].command_state = MoveCommandState::VELOCITY;
+    uint32_t arr_value = hw_configs[idx].timer_frequency /
+                         (std::abs(state[idx].target_velocity) * 2);
+    if (state[idx].target_velocity > 0.0f) {
+        gpio::write(hw_configs[idx].DIR, gpio::HIGH);
+    } else {
+        gpio::write(hw_configs[idx].DIR, gpio::LOW);
+    }
+    __HAL_TIM_SET_AUTORELOAD(&timers[idx], arr_value);
+    enable_irq(idx);
+    return;
+}
+void stepper::move(Port stepper, float position, float velocity) {
+    uint8_t idx = (uint8_t)stepper;
+    float angular_velocity = velocity / configs[idx].rotation_distance;
+    state[idx].target_velocity = angular_velocity *
+                                 configs[idx].steps_per_rotation *
+                                 usteps_to_val(configs[idx].microsteps);
+    state[idx].target_position = position * configs[idx].steps_per_rotation *
+                                 usteps_to_val(configs[idx].microsteps);
+    state[idx].command_state = MoveCommandState::POSITION;
+    uint32_t arr_value = hw_configs[idx].timer_frequency /
+                         (std::abs(state[idx].target_velocity) * 2);
+    if (state[idx].target_position > state[idx].current_position) {
+        gpio::write(hw_configs[idx].DIR, gpio::HIGH);
+    } else if (state[idx].target_position < state[idx].current_position) {
+        gpio::write(hw_configs[idx].DIR, gpio::LOW);
+    } else {
+        return;
+    }
+    __HAL_TIM_SET_AUTORELOAD(&timers[idx], arr_value);
+    enable_irq(idx);
+    return;
+}
+void stepper::stop(Port stepper) {
+    uint8_t idx = (uint8_t)stepper;
+    state[idx].command_state = MoveCommandState::NONE;
+    disable_irq(idx);
+    return;
 }
 
 bool init_driver(uint8_t idx) {
@@ -656,8 +733,106 @@ uint16_t usteps_to_val(stepper::MicroSteps usteps) {
     }
 }
 
-void flush_uart_rx(uint8_t idx) {
-    uint8_t dummy;
-    while (HAL_UART_Receive(&UARTs[idx], &dummy, sizeof(dummy), 1) == HAL_OK);
+bool init_timer(uint8_t idx) {
+    uint16_t prescaler = TIMER_INPUT_FREQ / hw_configs[idx].timer_frequency - 1;
+    timers[idx].Instance = hw_configs[idx].timer;
+    if (timers[idx].Instance == TIM12) {
+        __HAL_RCC_TIM12_CLK_ENABLE();
+    } else if (timers[idx].Instance == TIM13) {
+        __HAL_RCC_TIM13_CLK_ENABLE();
+    }
+    timers[idx].Init.Prescaler = prescaler;
+    timers[idx].Init.Period = 65535;
+    timers[idx].Init.CounterMode = TIM_COUNTERMODE_UP;
+    timers[idx].Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    timers[idx].Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+    if (HAL_TIM_Base_Init(&timers[idx]) != HAL_OK) {
+        return false;
+    }
+
+    TIM_MasterConfigTypeDef master_config = {};
+    master_config.MasterOutputTrigger = TIM_TRGO_ENABLE;
+    master_config.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&timers[idx], &master_config) !=
+        HAL_OK) {
+        return false;
+    }
+
+    if (timers[idx].Instance == TIM12) {
+        HAL_NVIC_SetPriority(TIM8_BRK_TIM12_IRQn, 0, 0);
+    } else if (timers[idx].Instance == TIM13) {
+        HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 0, 0);
+    }
+    HAL_TIM_Base_Start_IT(&timers[idx]);
+
+    return true;
+}
+
+void enable_irq(uint8_t idx) {
+    if (timers[idx].Instance == TIM12) {
+        HAL_NVIC_EnableIRQ(TIM8_BRK_TIM12_IRQn);
+    } else if (timers[idx].Instance == TIM13) {
+        HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
+    }
+    return;
+}
+
+void disable_irq(uint8_t idx) {
+    if (timers[idx].Instance == TIM12) {
+        HAL_NVIC_DisableIRQ(TIM8_BRK_TIM12_IRQn);
+    } else if (timers[idx].Instance == TIM13) {
+        HAL_NVIC_DisableIRQ(TIM8_UP_TIM13_IRQn);
+    }
+    return;
+}
+
+void irq_handler(uint8_t idx) {
+    switch (state[idx].command_state) {
+        case MoveCommandState::POSITION:
+            if (state[idx].current_position == state[0].target_position) {
+                state[idx].command_state = MoveCommandState::NONE;
+                disable_irq(idx);
+                break;
+            }
+            if (state[idx].step_pin_high) {
+                if (state[idx].target_velocity > 0) {
+                    state[idx].current_position++;
+                } else {
+                    state[idx].current_position--;
+                }
+            }
+            gpio::invert(hw_configs[idx].STEP);
+            break;
+        case MoveCommandState::VELOCITY:
+            if (state[idx].step_pin_high) {
+                if (state[idx].target_velocity > 0) {
+                    state[idx].current_position++;
+                } else {
+                    state[idx].current_position--;
+                }
+            }
+            gpio::invert(hw_configs[idx].STEP);
+            break;
+        case MoveCommandState::NONE:
+            disable_irq(idx);
+            break;
+    }
+    return;
+}
+
+void stepper::stepper1_irq_handler(void) {
+    irq_handler(0);
+    return;
+}
+void stepper::stepper1_hal_irq(void) {
+    HAL_TIM_IRQHandler(&timers[0]);
+    return;
+}
+void stepper::stepper2_irq_handler(void) {
+    irq_handler(1);
+    return;
+}
+void stepper::stepper2_hal_irq(void) {
+    HAL_TIM_IRQHandler(&timers[1]);
     return;
 }
