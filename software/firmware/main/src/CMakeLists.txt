@@ -7,6 +7,7 @@ debug_
 mpu
 fan_ssr
 stepper
+encoder
 )
 
 add_subdirectory(configs)
@@ -22,7 +23,7 @@ add_subdirectory(error)
 add_subdirectory(fan_ssr)
 add_subdirectory(stepper)
 add_subdirectory(peripherals)
-# add_subdirectory(encoder)
+add_subdirectory(encoder)
 # add_subdirectory(inverter)
 # add_subdirectory(optional)
 

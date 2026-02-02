@@ -23,7 +23,7 @@ const uint32_t STEPPER1_TIMER_FREQ = 10e6;  // Hz
 const gpio::PinConfig STEPPER2_TX = {GPIOE, gpio::Pin::PIN3,
                                      gpio::AF::AF11_USART10};
 const gpio::PinConfig STEPPER2_RX = {GPIOE, gpio::Pin::PIN2,
-                                     gpio::AF::AF11_USART10};
+                                     gpio::AF::AF4_USART10};
 const gpio::PinConfig STEPPER2_DIR = {GPIOE, gpio::Pin::PIN0, gpio::AF::NONE};
 const gpio::PinConfig STEPPER2_STEP = {GPIOE, gpio::Pin::PIN1, gpio::AF::NONE};
 const gpio::PinConfig STEPPER2_ENN = {GPIOE, gpio::Pin::PIN6, gpio::AF::NONE};

@@ -75,7 +75,7 @@ const HardwareConfig hw_configs[2] = {
      STEPPER1_SHUNT_RESISTANCE, STEPPER1_TIMER, STEPPER1_TIMER_FREQ},
     {STEPPER2_UART, STEPPER2_TX, STEPPER2_RX, STEPPER2_DIR, STEPPER2_STEP,
      STEPPER2_ENN, STEPPER2_INDEX, STEPPER2_DIAG, STEPPER2_ADDR,
-     STEPPER2_SHUNT_RESISTANCE, STEPPER1_TIMER, STEPPER1_TIMER_FREQ}};
+     STEPPER2_SHUNT_RESISTANCE, STEPPER2_TIMER, STEPPER2_TIMER_FREQ}};
 
 static stepper::Config configs[2] = {{}, {}};
 static StepperState state[2] = {{}, {}};
@@ -258,55 +258,55 @@ stepper::InitStatus stepper::init(Config stepper1_config,
         case LoadConfStatus::IFCNT_MISMATCH:
             return InitStatus::STEPPER1_IFCNT_MISMATCH;
     }
-    // load_conf_status = load_config(1);
-    // switch (load_conf_status) {
-    //     case LoadConfStatus::OK:
-    //         break;
-    //     case LoadConfStatus::WRITE_GCONF_ERR:
-    //         return InitStatus::STEPPER2_WRITE_GCONF_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_NODECONF_ERR:
-    //         return InitStatus::STEPPER2_WRITE_NODECONF_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_IHOLD_IRUN_ERR:
-    //         return InitStatus::STEPPER2_WRITE_IHOLD_IRUN_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_TPOWERDOWN_ERR:
-    //         return InitStatus::STEPPER2_WRITE_TPOWERDOWN_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_TPWMTHRS_ERR:
-    //         return InitStatus::STEPPER2_WRITE_TPWMTHRS_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_TCOOLTHRS_ERR:
-    //         return InitStatus::STEPPER2_WRITE_TCOOLTHRS_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_SGTHRS_ERR:
-    //         return InitStatus::STEPPER2_WRITE_SGTHRS_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_COOLCONF_ERR:
-    //         return InitStatus::STEPPER2_WRITE_COOLCONF_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_CHOPCONF_ERR:
-    //         return InitStatus::STEPPER2_WRITE_CHOPCONF_ERR;
-    //         break;
-    //     case LoadConfStatus::WRITE_PWMCONF_ERR:
-    //         return InitStatus::STEPPER2_WRITE_PWMCONF_ERR;
-    //         break;
-    //     case LoadConfStatus::READ_IFCNT_REQ_HAL_ERROR:
-    //         return InitStatus::STEPPER2_READ_IFCNT_REQ_HAL_ERROR;
-    //         break;
-    //     case LoadConfStatus::READ_IFCNT_RECV_HAL_ERROR:
-    //         return InitStatus::STEPPER2_READ_IFCNT_RECV_HAL_ERROR;
-    //         break;
-    //     case LoadConfStatus::READ_IFCNT_RECV_SYNC_MISMATCH:
-    //         return InitStatus::STEPPER2_READ_IFCNT_RECV_SYNC_MISMATCH;
-    //         break;
-    //     case LoadConfStatus::READ_IFCNT_RECV_CRC_MISMATCH:
-    //         return InitStatus::STEPPER2_READ_IFCNT_RECV_CRC_MISMATCH;
-    //         break;
-    //     case LoadConfStatus::IFCNT_MISMATCH:
-    //         return InitStatus::STEPPER2_IFCNT_MISMATCH;
-    // }
+    load_conf_status = load_config(1);
+    switch (load_conf_status) {
+        case LoadConfStatus::OK:
+            break;
+        case LoadConfStatus::WRITE_GCONF_ERR:
+            return InitStatus::STEPPER2_WRITE_GCONF_ERR;
+            break;
+        case LoadConfStatus::WRITE_NODECONF_ERR:
+            return InitStatus::STEPPER2_WRITE_NODECONF_ERR;
+            break;
+        case LoadConfStatus::WRITE_IHOLD_IRUN_ERR:
+            return InitStatus::STEPPER2_WRITE_IHOLD_IRUN_ERR;
+            break;
+        case LoadConfStatus::WRITE_TPOWERDOWN_ERR:
+            return InitStatus::STEPPER2_WRITE_TPOWERDOWN_ERR;
+            break;
+        case LoadConfStatus::WRITE_TPWMTHRS_ERR:
+            return InitStatus::STEPPER2_WRITE_TPWMTHRS_ERR;
+            break;
+        case LoadConfStatus::WRITE_TCOOLTHRS_ERR:
+            return InitStatus::STEPPER2_WRITE_TCOOLTHRS_ERR;
+            break;
+        case LoadConfStatus::WRITE_SGTHRS_ERR:
+            return InitStatus::STEPPER2_WRITE_SGTHRS_ERR;
+            break;
+        case LoadConfStatus::WRITE_COOLCONF_ERR:
+            return InitStatus::STEPPER2_WRITE_COOLCONF_ERR;
+            break;
+        case LoadConfStatus::WRITE_CHOPCONF_ERR:
+            return InitStatus::STEPPER2_WRITE_CHOPCONF_ERR;
+            break;
+        case LoadConfStatus::WRITE_PWMCONF_ERR:
+            return InitStatus::STEPPER2_WRITE_PWMCONF_ERR;
+            break;
+        case LoadConfStatus::READ_IFCNT_REQ_HAL_ERROR:
+            return InitStatus::STEPPER2_READ_IFCNT_REQ_HAL_ERROR;
+            break;
+        case LoadConfStatus::READ_IFCNT_RECV_HAL_ERROR:
+            return InitStatus::STEPPER2_READ_IFCNT_RECV_HAL_ERROR;
+            break;
+        case LoadConfStatus::READ_IFCNT_RECV_SYNC_MISMATCH:
+            return InitStatus::STEPPER2_READ_IFCNT_RECV_SYNC_MISMATCH;
+            break;
+        case LoadConfStatus::READ_IFCNT_RECV_CRC_MISMATCH:
+            return InitStatus::STEPPER2_READ_IFCNT_RECV_CRC_MISMATCH;
+            break;
+        case LoadConfStatus::IFCNT_MISMATCH:
+            return InitStatus::STEPPER2_IFCNT_MISMATCH;
+    }
 
     if (!init_timer(0)) {
         return InitStatus::STEPPER1_TIM_INIT_FAILED;
@@ -352,8 +352,11 @@ void stepper::set_angular_velocity(Port stepper, float angular_velocity) {
                          (std::abs(state[idx].target_velocity) * 2);
     if (state[idx].target_velocity > 0.0f) {
         gpio::write(hw_configs[idx].DIR, gpio::HIGH);
-    } else {
+    } else if (state[idx].target_velocity < 0.0f) {
         gpio::write(hw_configs[idx].DIR, gpio::LOW);
+    } else {
+        stop(stepper);
+        return;
     }
     __HAL_TIM_SET_AUTORELOAD(&timers[idx], arr_value);
     enable_irq(idx);
@@ -759,9 +762,9 @@ bool init_timer(uint8_t idx) {
     }
 
     if (timers[idx].Instance == TIM12) {
-        HAL_NVIC_SetPriority(TIM8_BRK_TIM12_IRQn, 0, 0);
+        HAL_NVIC_SetPriority(TIM8_BRK_TIM12_IRQn, 1, 0);
     } else if (timers[idx].Instance == TIM13) {
-        HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 0, 0);
+        HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 1, 0);
     }
     HAL_TIM_Base_Start_IT(&timers[idx]);
 
@@ -787,6 +790,21 @@ void disable_irq(uint8_t idx) {
 }
 
 void irq_handler(uint8_t idx) {
+    if (state[idx].step_pin_high) {
+        gpio::write(hw_configs[idx].STEP, gpio::LOW);
+        state[idx].step_pin_high = false;
+    } else {
+        gpio::write(hw_configs[idx].STEP, gpio::HIGH);
+        state[idx].step_pin_high = true;
+        return;
+    }
+
+    if (state[idx].target_velocity > 0) {
+        state[idx].current_position++;
+    } else {
+        state[idx].current_position--;
+    }
+
     switch (state[idx].command_state) {
         case MoveCommandState::POSITION:
             if (state[idx].current_position == state[0].target_position) {
@@ -794,24 +812,8 @@ void irq_handler(uint8_t idx) {
                 disable_irq(idx);
                 break;
             }
-            if (state[idx].step_pin_high) {
-                if (state[idx].target_velocity > 0) {
-                    state[idx].current_position++;
-                } else {
-                    state[idx].current_position--;
-                }
-            }
-            gpio::invert(hw_configs[idx].STEP);
             break;
         case MoveCommandState::VELOCITY:
-            if (state[idx].step_pin_high) {
-                if (state[idx].target_velocity > 0) {
-                    state[idx].current_position++;
-                } else {
-                    state[idx].current_position--;
-                }
-            }
-            gpio::invert(hw_configs[idx].STEP);
             break;
         case MoveCommandState::NONE:
             disable_irq(idx);

@@ -57,7 +57,7 @@ void gpio::attach_interrupt(const PinConfig& pin_config, Mode mode, Pull pull,
         irq_number = EXTI15_10_IRQn;
     }
 
-    HAL_NVIC_SetPriority(irq_number, 5, 0);
+    HAL_NVIC_SetPriority(irq_number, 0, 0);
     HAL_NVIC_EnableIRQ(irq_number);
 }
 

@@ -2,6 +2,7 @@
 
 #include "clock.hpp"
 #include "config.hpp"
+#include "encoder.hpp"
 #include "stepper.hpp"
 
 extern "C" {
@@ -127,27 +128,10 @@ void EXTI4_IRQHandler(void) { HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4); }
 /**
  * @brief This function handles EXTI line[9:5] interrupts.
  */
-void EXTI9_5_IRQHandler(void) {
-    // Note: The HAL handler will check for pins 5, 6, 7, 8, and 9
-    // You can call it for each one, but it's more efficient to just check one
-    // as the HAL function iterates through them anyway.
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_7);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
-}
+void EXTI9_5_IRQHandler(void) { HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5); }
 
 /**
  * @brief This function handles EXTI line[15:10] interrupts.
  */
-void EXTI15_10_IRQHandler(void) {
-    // Note: The HAL handler will check for pins 10 through 15.
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_12);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_14);
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);
-}
+void EXTI15_10_IRQHandler(void) { HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10); }
 }

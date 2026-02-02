@@ -9,6 +9,7 @@
 
 #include "clock.hpp"
 #include "debug.hpp"
+#include "encoder.hpp"
 #include "error.hpp"
 #include "fan_ssr.hpp"
 #include "gpio.hpp"
@@ -23,12 +24,12 @@ gpio::PinConfig LED = {GPIOA, gpio::Pin::PIN15, gpio::AF::NONE};
 stepper::Config stepper1_conf = {250000,
                                  20,
                                  200,
-                                 stepper::MicroSteps::MS8,
+                                 stepper::MicroSteps::MS32,
                                  stepper::Direction::NONINVERTED,
                                  0.1f,
                                  0.1f,
-                                 stepper::ChopperMode::stealthchop,
-                                 10000.0f,
+                                 stepper::ChopperMode::spreadcycle,
+                                 300.0f,
                                  false,
                                  0,
                                  10000.0f,
@@ -107,6 +108,8 @@ void main_task([[maybe_unused]] void *args) {
         error::handler();
     }
 
+    encoder::init();
+
     if (!fan_ssr::enable_port(fan_ssr::Port::P5)) {
         debug::error("FAN/SSR enable port error");
         vTaskDelay(5000);
@@ -116,35 +119,31 @@ void main_task([[maybe_unused]] void *args) {
     };
 
     stepper::enable(stepper::Port::P1);
+    stepper::enable(stepper::Port::P2);
 
     float duty_cycle = 0.0f;
     bool up = true;
     for (;;) {
         if (up) {
-            duty_cycle += 0.05f;
+            duty_cycle += 0.1f;
         } else {
-            duty_cycle -= 0.05f;
+            duty_cycle -= 0.1f;
         }
-        if (duty_cycle > 1.0f) {
-            duty_cycle -= 0.05f;
+        if (duty_cycle > 5.0f) {
+            duty_cycle -= 0.1f;
             up = false;
-        } else if (duty_cycle < 0.0f) {
-            duty_cycle += 0.05f;
+        } else if (duty_cycle < -5.0f) {
+            duty_cycle += 0.1f;
             up = true;
         }
         gpio::invert(LED);
         fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 0.0f);
         // HAL_Delay(1);
-        debug::debug("Hello World!");
-        if (up) {
-            stepper::set_angular_velocity(stepper::Port::P1, 1.0f);
-        } else {
-            stepper::set_angular_velocity(stepper::Port::P1, -1.0f);
-        }
-        // for (int i = 0; i < 10000; i++) {
-        //     stepper::step(stepper::Port::P1);
-        //     vTaskDelay(1);
-        // }
+        // debug::debug("Hello World!");
+        int64_t encoder_reading = encoder::get_count();
+        debug::log("encoder count: %lld", encoder_reading);
+        stepper::set_angular_velocity(stepper::Port::P1, duty_cycle / 5.0f);
+        stepper::set_angular_velocity(stepper::Port::P2, duty_cycle);
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
