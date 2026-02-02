@@ -13,6 +13,7 @@
 #include "error.hpp"
 #include "fan_ssr.hpp"
 #include "gpio.hpp"
+#include "motor.hpp"
 #include "mpu.hpp"
 #include "stepper.hpp"
 #include "usb.hpp"
@@ -110,6 +111,12 @@ void main_task([[maybe_unused]] void *args) {
 
     encoder::init();
 
+    if (!motor::init(0.5f)) {
+        debug::error("motor initialisation unsuccessful");
+        vTaskDelay(5000);
+        error::handler();
+    }
+
     if (!fan_ssr::enable_port(fan_ssr::Port::P5)) {
         debug::error("FAN/SSR enable port error");
         vTaskDelay(5000);
@@ -125,15 +132,15 @@ void main_task([[maybe_unused]] void *args) {
     bool up = true;
     for (;;) {
         if (up) {
-            duty_cycle += 0.1f;
+            duty_cycle += 0.01f;
         } else {
-            duty_cycle -= 0.1f;
+            duty_cycle -= 0.01f;
         }
-        if (duty_cycle > 5.0f) {
-            duty_cycle -= 0.1f;
+        if (duty_cycle > 0.2f) {
+            duty_cycle -= 0.01f;
             up = false;
-        } else if (duty_cycle < -5.0f) {
-            duty_cycle += 0.1f;
+        } else if (duty_cycle < -0.2f) {
+            duty_cycle += 0.01f;
             up = true;
         }
         gpio::invert(LED);
@@ -142,8 +149,9 @@ void main_task([[maybe_unused]] void *args) {
         // debug::debug("Hello World!");
         int64_t encoder_reading = encoder::get_count();
         debug::log("encoder count: %lld", encoder_reading);
-        stepper::set_angular_velocity(stepper::Port::P1, duty_cycle / 5.0f);
-        stepper::set_angular_velocity(stepper::Port::P2, duty_cycle);
+        // motor::set_duty_cycle(0.49f);
+        // stepper::set_angular_velocity(stepper::Port::P1, duty_cycle / 5.0f);
+        // stepper::set_angular_velocity(stepper::Port::P2, duty_cycle);
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

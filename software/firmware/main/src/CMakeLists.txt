@@ -8,6 +8,7 @@ mpu
 fan_ssr
 stepper
 encoder
+motor
 )
 
 add_subdirectory(configs)
@@ -24,8 +25,7 @@ add_subdirectory(fan_ssr)
 add_subdirectory(stepper)
 add_subdirectory(peripherals)
 add_subdirectory(encoder)
-# add_subdirectory(inverter)
-# add_subdirectory(optional)
+add_subdirectory(motor)
 
 set(TARGET_NAME "${PROJECT_NAME}-${MCU_SERIES}")
 add_executable(${TARGET_NAME})

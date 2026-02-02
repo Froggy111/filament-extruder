@@ -10,6 +10,7 @@ PUBLIC
     configs/fan_ssr.hpp
     configs/stepper.hpp
     configs/peripherals.hpp
+    configs/motor.hpp
 
     configs/encoder.hpp
     configs/encoder/ABZ.hpp

@@ -9,5 +9,6 @@
 #include "configs/debug.hpp"
 #include "configs/encoder.hpp"
 #include "configs/fan_ssr.hpp"
+#include "configs/motor.hpp"
 #include "configs/peripherals.hpp"
 #include "configs/stepper.hpp"

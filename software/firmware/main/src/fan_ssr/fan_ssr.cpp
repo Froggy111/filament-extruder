@@ -179,6 +179,7 @@ bool fan_ssr::disable_port(Port port) {
         return true;
 }
 bool fan_ssr::set_duty_cycle(Port port, float duty_cycle) {
+    duty_cycle = std::fabs(duty_cycle);
     if (duty_cycle < 0.0f || duty_cycle > 1.0f) {
         return false;
     }
