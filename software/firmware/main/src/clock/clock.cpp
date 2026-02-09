@@ -73,7 +73,7 @@ void clock::init() {
      * PLL2:
      * PLLM = 5 => 25MHz / 5 = 5MHz (Ref)
      * PLLN = 64 => 5MHz * 64 = 320MHz (VCO)
-     * PLLP = 4  => 320MHz / 4 = 80MHz (ADC clk)
+     * PLLP = 2  => 320MHz / 2 = 160MHz
      * PLLQ = 2 => 320MHz / 2 = 160MHz
      * PLLR = 2 => 320MHz / 2 = 160MHz (QSPI clk)
      *
@@ -82,11 +82,11 @@ void clock::init() {
      * PLLN = 48 => 5MHz * 48 = 240MHz (VCO)
      * PLLP = 2 => 240MHz / 2 = 120MHz
      * PLLQ = 5 => 240MHz / 5 => 48MHz (USB clk)
-     * PLLR = 2 => 240MHz / 2 = 120MHz
+     * PLLR = 8 => 240MHz / 8 = 30MHz (ADC clk)
      */
     periph_clk_init.PLL2.PLL2M = 5;
     periph_clk_init.PLL2.PLL2N = 64;
-    periph_clk_init.PLL2.PLL2P = 4;
+    periph_clk_init.PLL2.PLL2P = 2;
     periph_clk_init.PLL2.PLL2Q = 2;
     periph_clk_init.PLL2.PLL2R = 2;
     periph_clk_init.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
@@ -96,7 +96,7 @@ void clock::init() {
     periph_clk_init.PLL3.PLL3N = 48;
     periph_clk_init.PLL3.PLL3P = 2;
     periph_clk_init.PLL3.PLL3Q = 5;
-    periph_clk_init.PLL3.PLL3R = 2;
+    periph_clk_init.PLL3.PLL3R = 16;
     periph_clk_init.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_2;
     periph_clk_init.PLL3.PLL3VCOSEL = RCC_PLL3VCOWIDE;
     periph_clk_init.PLL3.PLL3FRACN = 0;
@@ -104,7 +104,7 @@ void clock::init() {
     periph_clk_init.Usart16ClockSelection = RCC_USART16910CLKSOURCE_D2PCLK2;
     periph_clk_init.Usart234578ClockSelection =
         RCC_USART234578CLKSOURCE_D2PCLK1;
-    periph_clk_init.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
+    periph_clk_init.AdcClockSelection = RCC_ADCCLKSOURCE_PLL3;
     periph_clk_init.UsbClockSelection = RCC_USBCLKSOURCE_PLL3;
     periph_clk_init.OspiClockSelection = RCC_OSPICLKSOURCE_PLL2;
 

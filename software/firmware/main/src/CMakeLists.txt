@@ -9,6 +9,8 @@ fan_ssr
 stepper
 encoder
 motor
+indicator
+thermistor
 )
 
 add_subdirectory(configs)
@@ -26,6 +28,8 @@ add_subdirectory(stepper)
 add_subdirectory(peripherals)
 add_subdirectory(encoder)
 add_subdirectory(motor)
+add_subdirectory(indicator)
+add_subdirectory(thermistor)
 
 set(TARGET_NAME "${PROJECT_NAME}-${MCU_SERIES}")
 add_executable(${TARGET_NAME})

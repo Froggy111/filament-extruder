@@ -13,9 +13,11 @@
 #include "error.hpp"
 #include "fan_ssr.hpp"
 #include "gpio.hpp"
+#include "indicator.hpp"
 #include "motor.hpp"
 #include "mpu.hpp"
 #include "stepper.hpp"
+#include "thermistor.hpp"
 #include "usb.hpp"
 
 void main_task(void *args);
@@ -59,6 +61,8 @@ void main_task([[maybe_unused]] void *args) {
     usb::init();
 
     vTaskDelay(pdMS_TO_TICKS(100));
+
+    indicator::init();
 
     fan_ssr::InitStatus fan_ssr_init_status =
         fan_ssr::init(fan_ssr::Mode::FAN, 50.0f, fan_ssr::Mode::FAN, 50.0f,
@@ -117,16 +121,46 @@ void main_task([[maybe_unused]] void *args) {
         error::handler();
     }
 
-    if (!fan_ssr::enable_port(fan_ssr::Port::P5)) {
-        debug::error("FAN/SSR enable port error");
+    thermistor::InitStatus therm_init_status = thermistor::init();
+    switch (therm_init_status) {
+        case thermistor::InitStatus::OK:
+            debug::debug("thermistor initialisation successful");
+            break;
+        case thermistor::InitStatus::ADC1_INIT_FAILED:
+            debug::error("thermistor ADC1 initialisation failed");
+            break;
+        case thermistor::InitStatus::ADC1_CALIBRATION_FAILED:
+            debug::error("thermistor ADC1 calibration failed");
+            break;
+        case thermistor::InitStatus::ADC2_INIT_FAILED:
+            debug::error("thermistor ADC2 initialisation failed");
+            break;
+        case thermistor::InitStatus::ADC2_CALIBRATION_FAILED:
+            debug::error("thermistor ADC2 calibration failed");
+            break;
+        case thermistor::InitStatus::ADC3_INIT_FAILED:
+            debug::error("thermistor ADC3 initialisation failed");
+            break;
+        case thermistor::InitStatus::ADC3_CALIBRATION_FAILED:
+            debug::error("thermistor ADC3 calibration failed");
+            break;
+    }
+    if (therm_init_status != thermistor::InitStatus::OK) {
+        debug::error("thermistor initialisation unsuccessful");
         vTaskDelay(5000);
         error::handler();
-    } else {
-        debug::debug("FAN/SSR enable port successful");
-    };
+    }
 
-    stepper::enable(stepper::Port::P1);
-    stepper::enable(stepper::Port::P2);
+    // if (!fan_ssr::enable_port(fan_ssr::Port::P5)) {
+    //     debug::error("FAN/SSR enable port error");
+    //     vTaskDelay(5000);
+    //     error::handler();
+    // } else {
+    //     debug::debug("FAN/SSR enable port successful");
+    // };
+    //
+    // stepper::enable(stepper::Port::P1);
+    // stepper::enable(stepper::Port::P2);
 
     float duty_cycle = 0.0f;
     bool up = true;
@@ -144,14 +178,19 @@ void main_task([[maybe_unused]] void *args) {
             up = true;
         }
         gpio::invert(LED);
-        fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 0.0f);
+        // fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 0.0f);
         // HAL_Delay(1);
         // debug::debug("Hello World!");
-        int64_t encoder_reading = encoder::get_count();
-        debug::log("encoder count: %lld", encoder_reading);
+        // int64_t encoder_reading = encoder::get_count();
+        // debug::log("encoder count: %lld", encoder_reading);
+        // float indicator_reading = indicator::read();
+        // debug::log("indicator reading: %f", indicator_reading);
+        float thermistor_reading = thermistor::read(thermistor::Port::P1);
+        debug::log("thermistor reading: %f", thermistor_reading);
         // motor::set_duty_cycle(0.49f);
-        // stepper::set_angular_velocity(stepper::Port::P1, duty_cycle / 5.0f);
-        // stepper::set_angular_velocity(stepper::Port::P2, duty_cycle);
+        // stepper::set_angular_velocity(stepper::Port::P1, duty_cycle
+        // / 5.0f); stepper::set_angular_velocity(stepper::Port::P2,
+        // duty_cycle);
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

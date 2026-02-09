@@ -11,6 +11,8 @@ PUBLIC
     configs/stepper.hpp
     configs/peripherals.hpp
     configs/motor.hpp
+    configs/indicator.hpp
+    configs/thermistor.hpp
 
     configs/encoder.hpp
     configs/encoder/ABZ.hpp
