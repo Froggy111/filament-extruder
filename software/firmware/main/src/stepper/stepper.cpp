@@ -375,8 +375,10 @@ void stepper::move(Port stepper, float position, float velocity) {
                          (std::abs(state[idx].target_velocity) * 2);
     if (state[idx].target_position > state[idx].current_position) {
         gpio::write(hw_configs[idx].DIR, gpio::HIGH);
+        state[idx].target_velocity = state[idx].target_velocity;
     } else if (state[idx].target_position < state[idx].current_position) {
         gpio::write(hw_configs[idx].DIR, gpio::LOW);
+        state[idx].target_velocity = -state[idx].target_velocity;
     } else {
         return;
     }
@@ -384,10 +386,19 @@ void stepper::move(Port stepper, float position, float velocity) {
     enable_irq(idx);
     return;
 }
+bool stepper::move_complete(Port stepper) {
+    uint8_t idx = (uint8_t)stepper;
+    return (state[idx].command_state == MoveCommandState::NONE);
+}
 void stepper::stop(Port stepper) {
     uint8_t idx = (uint8_t)stepper;
     state[idx].command_state = MoveCommandState::NONE;
     disable_irq(idx);
+    return;
+}
+void stepper::zero_position(Port stepper) {
+    uint8_t idx = (uint8_t)stepper;
+    state[idx].current_position = 0;
     return;
 }
 
@@ -807,7 +818,7 @@ void irq_handler(uint8_t idx) {
 
     switch (state[idx].command_state) {
         case MoveCommandState::POSITION:
-            if (state[idx].current_position == state[0].target_position) {
+            if (state[idx].current_position == state[idx].target_position) {
                 state[idx].command_state = MoveCommandState::NONE;
                 disable_irq(idx);
                 break;

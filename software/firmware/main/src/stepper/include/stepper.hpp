@@ -93,7 +93,9 @@ void set_velocity(Port stepper, float velocity);
 // this is in rotations/second, not radians
 void set_angular_velocity(Port stepper, float angular_velocity);
 void move(Port stepper, float position, float velocity);
+bool move_complete(Port stepper);
 void stop(Port stepper);
+void zero_position(Port stepper);
 
 // used in core_interrupts.cpp
 void stepper1_irq_handler(void);

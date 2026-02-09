@@ -11,6 +11,7 @@ encoder
 motor
 indicator
 thermistor
+spooler
 )
 
 add_subdirectory(configs)
@@ -30,6 +31,7 @@ add_subdirectory(encoder)
 add_subdirectory(motor)
 add_subdirectory(indicator)
 add_subdirectory(thermistor)
+add_subdirectory(spooler)
 
 set(TARGET_NAME "${PROJECT_NAME}-${MCU_SERIES}")
 add_executable(${TARGET_NAME})

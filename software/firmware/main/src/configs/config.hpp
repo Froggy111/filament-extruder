@@ -12,5 +12,6 @@
 #include "configs/indicator.hpp"
 #include "configs/motor.hpp"
 #include "configs/peripherals.hpp"
-#include "configs/stepper.hpp"
+#include "configs/spooler.hpp"
+#include "configs/stepper_.hpp"
 #include "configs/thermistor.hpp"

@@ -16,6 +16,7 @@
 #include "indicator.hpp"
 #include "motor.hpp"
 #include "mpu.hpp"
+#include "spooler.hpp"
 #include "stepper.hpp"
 #include "thermistor.hpp"
 #include "usb.hpp"
@@ -101,7 +102,7 @@ void main_task([[maybe_unused]] void *args) {
     }
 
     stepper::InitStatus stepper_init_status =
-        stepper::init(stepper1_conf, stepper2_conf);
+        stepper::init(stepper1_conf, SPOOLER_STEPPER_CONF);
     switch (stepper_init_status) {
         case stepper::InitStatus::OK:
             debug::debug("stepper initialisation successful");
@@ -165,6 +166,9 @@ void main_task([[maybe_unused]] void *args) {
     // stepper::enable(stepper::Port::P1);
     // stepper::enable(stepper::Port::P2);
 
+    // spooler::init();
+    // spooler::start();
+
     float duty_cycle = 0.0f;
     bool up = true;
     for (;;) {
@@ -188,14 +192,14 @@ void main_task([[maybe_unused]] void *args) {
         // debug::log("encoder count: %lld", encoder_reading);
         // float indicator_reading = indicator::read();
         // debug::log("indicator reading: %f", indicator_reading);
-        uint32_t start_cycles = DWT->CYCCNT;
-        float thermistor_reading = thermistor::read(thermistor::Port::P1);
-        uint32_t end_cycles = DWT->CYCCNT;
-        uint32_t total_cycles = end_cycles - start_cycles;
-        uint32_t cpu_freq = HAL_RCC_GetSysClockFreq();
-        float time_us = ((float)total_cycles * 1.0e6f) / cpu_freq;
-        debug::log("thermistor reading: %f, time taken: %fus, cpu freq: %u",
-                   thermistor_reading, time_us, cpu_freq);
+        // uint32_t start_cycles = DWT->CYCCNT;
+        // float thermistor_reading = thermistor::read(thermistor::Port::P1);
+        // uint32_t end_cycles = DWT->CYCCNT;
+        // uint32_t total_cycles = end_cycles - start_cycles;
+        // uint32_t cpu_freq = HAL_RCC_GetSysClockFreq();
+        // float time_us = ((float)total_cycles * 1.0e6f) / cpu_freq;
+        // debug::log("thermistor reading: %f, time taken: %fus, cpu freq: %u",
+        //            thermistor_reading, time_us, cpu_freq);
         // motor::set_duty_cycle(0.49f);
         // stepper::set_angular_velocity(stepper::Port::P1, duty_cycle
         // / 5.0f); stepper::set_angular_velocity(stepper::Port::P2,
