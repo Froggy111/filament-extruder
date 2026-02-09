@@ -144,6 +144,9 @@ void main_task([[maybe_unused]] void *args) {
         case thermistor::InitStatus::ADC3_CALIBRATION_FAILED:
             debug::error("thermistor ADC3 calibration failed");
             break;
+        case thermistor::InitStatus::CHANNEL_INIT_FAILED:
+            debug::error("thermistor channel initialisation failed");
+            break;
     }
     if (therm_init_status != thermistor::InitStatus::OK) {
         debug::error("thermistor initialisation unsuccessful");
@@ -185,8 +188,14 @@ void main_task([[maybe_unused]] void *args) {
         // debug::log("encoder count: %lld", encoder_reading);
         // float indicator_reading = indicator::read();
         // debug::log("indicator reading: %f", indicator_reading);
+        uint32_t start_cycles = DWT->CYCCNT;
         float thermistor_reading = thermistor::read(thermistor::Port::P1);
-        debug::log("thermistor reading: %f", thermistor_reading);
+        uint32_t end_cycles = DWT->CYCCNT;
+        uint32_t total_cycles = end_cycles - start_cycles;
+        uint32_t cpu_freq = HAL_RCC_GetSysClockFreq();
+        float time_us = ((float)total_cycles * 1.0e6f) / cpu_freq;
+        debug::log("thermistor reading: %f, time taken: %fus, cpu freq: %u",
+                   thermistor_reading, time_us, cpu_freq);
         // motor::set_duty_cycle(0.49f);
         // stepper::set_angular_velocity(stepper::Port::P1, duty_cycle
         // / 5.0f); stepper::set_angular_velocity(stepper::Port::P2,

@@ -14,7 +14,7 @@
 /**
  * @brief Debug output settings. Comment out defines to disable a log level.
  */
-// #ifndef NDEBUG
+#ifndef NDEBUG
 
 #define DEBUG_ENABLED
 #define DEBUG_LEVEL_TRACE
@@ -25,4 +25,4 @@
 #define DEBUG_LEVEL_ERROR
 #define DEBUG_LEVEL_FATAL
 
-// #endif
+#endif

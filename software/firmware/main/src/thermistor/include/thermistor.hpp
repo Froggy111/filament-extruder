@@ -23,6 +23,7 @@ enum class InitStatus : uint8_t {
     ADC2_CALIBRATION_FAILED,
     ADC3_INIT_FAILED,
     ADC3_CALIBRATION_FAILED,
+    CHANNEL_INIT_FAILED,
 };
 
 InitStatus init(void);

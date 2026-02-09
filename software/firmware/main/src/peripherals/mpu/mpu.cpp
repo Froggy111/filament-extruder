@@ -37,4 +37,6 @@ void mpu::init(void) {
     HAL_MPU_ConfigRegion(&mpu_config);
 
     HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+    SCB_EnableICache();
+    SCB_EnableDCache();
 }

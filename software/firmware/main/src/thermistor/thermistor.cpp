@@ -45,7 +45,7 @@ static const uint32_t resolutions[3] = {1 << 16, 1 << 16, 1 << 16};
 
 float calc_temp(float resistance);
 InitInstanceStatus init_instance(ADC_TypeDef* instance);
-void init_channel(uint8_t idx);
+bool init_channel(uint8_t idx);
 uint8_t adc_instance_to_idx(ADC_TypeDef* instance);
 
 thermistor::InitStatus thermistor::init(void) {
@@ -87,7 +87,9 @@ thermistor::InitStatus thermistor::init(void) {
     }
 
     for (int i = 0; i < 8; i++) {
-        init_channel(i);
+        if (!init_channel(i)) {
+            return InitStatus::CHANNEL_INIT_FAILED;
+        }
     }
 
     return InitStatus::OK;
@@ -104,7 +106,6 @@ float thermistor::read(Port port) {
     }
 
     uint16_t val = HAL_ADC_GetValue(state[idx].handle);
-    debug::log("val: %u", val);
     float ratio = ((float)val / (float)state[idx].resolution);
     // V = ADC_VREF * R / (R + Rfixed)
     // V * R + V * Rfixed = ADC_VREF * R
@@ -115,7 +116,7 @@ float thermistor::read(Port port) {
     return temp;
 }
 
-void init_channel(uint8_t idx) {
+bool init_channel(uint8_t idx) {
     uint8_t instance_idx = adc_instance_to_idx(hwconfigs[idx].ADC_instance);
     state[idx].handle = &handles[instance_idx];
     state[idx].resolution = resolutions[instance_idx];
@@ -128,9 +129,13 @@ void init_channel(uint8_t idx) {
     conf->OffsetNumber = ADC_OFFSET_NONE;
     conf->Offset = 0;
 
+    if (HAL_ADC_ConfigChannel(state[idx].handle, conf) != HAL_OK) {
+        return false;
+    }
+
     gpio::init(hwconfigs[idx].pin, gpio::Mode::ANALOG, gpio::Pull::NOPULL,
                gpio::Speed::LOW);
-    return;
+    return true;
 }
 
 InitInstanceStatus init_instance(ADC_TypeDef* instance) {
