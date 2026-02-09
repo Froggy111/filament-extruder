@@ -26,6 +26,6 @@ const stepper::Config SPOOLER_STEPPER_CONF = {250000,
                                               0.0f,
                                               0.0f};
 
-const float SPOOLER_HOME_VELOCITY = 0.5f;  // in mm/s
-const float SPOOLER_VELOCITY = 0.5f;       // in mm/s
-const float SPOOLER_DUTY_CYCLE = 0.2f;
+const float SPOOLER_HOME_VELOCITY = 1.0f;  // in mm/s
+const float SPOOLER_VELOCITY = 2.0f;       // in mm/s
+const float SPOOLER_DUTY_CYCLE = 0.5f;

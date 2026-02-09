@@ -187,7 +187,7 @@ void main_task([[maybe_unused]] void *args) {
         gpio::invert(LED);
         // fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 0.0f);
         // HAL_Delay(1);
-        // debug::debug("Hello World!");
+        debug::debug("Hello World!");
         // int64_t encoder_reading = encoder::get_count();
         // debug::log("encoder count: %lld", encoder_reading);
         // float indicator_reading = indicator::read();
