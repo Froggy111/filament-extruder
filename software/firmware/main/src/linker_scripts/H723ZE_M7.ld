@@ -1,19 +1,26 @@
+/* ENTRY Point */
 ENTRY(Reset_Handler)
 
-_estack = 0x20000000 + 128K;
-_Min_Heap_Size = 0x200;
-_Min_Stack_Size = 0x400;
+/* Highest address of the user mode stack */
+_estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM);    /* end of RAM */
 
+/* Generate a link error if heap and stack don't fit into RAM */
+_Min_Heap_Size = 0x200;      /* required amount of heap  */
+_Min_Stack_Size = 0x400;     /* required amount of stack */
+
+/* Specify the memory areas */
 MEMORY
 {
-    FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 512K
-    RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
-
-
+  FLASH    (rx)    : ORIGIN = 0x08000000, LENGTH = 512K
+  DTCMRAM  (xrw)   : ORIGIN = 0x20000000, LENGTH = 128K
+  RAM_D1   (xrw)   : ORIGIN = 0x24000000, LENGTH = 320K
+  RAM_D2   (xrw)   : ORIGIN = 0x30000000, LENGTH = 32K
+  RAM_D3   (xrw)   : ORIGIN = 0x38000000, LENGTH = 16K
 }
 
 SECTIONS
 {
+  /* The startup code goes first into FLASH */
   .isr_vector :
   {
     . = ALIGN(4);
@@ -21,6 +28,7 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  /* The program code and other data goes into FLASH */
   .text :
   {
     . = ALIGN(4);
@@ -58,6 +66,7 @@ SECTIONS
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
   } >FLASH
+  
   .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);
@@ -65,6 +74,7 @@ SECTIONS
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
   } >FLASH
+  
   .fini_array :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
@@ -75,6 +85,7 @@ SECTIONS
 
   _sidata = LOADADDR(.data);
 
+  /* Initialized data sections go into DTCM (Fastest access for initialized vars) */
   .data : 
   {
     . = ALIGN(4);
@@ -84,8 +95,12 @@ SECTIONS
 
     . = ALIGN(4);
     _edata = .;
-  } >RAM AT> FLASH
+  } >DTCMRAM AT> FLASH
 
+  /* 
+   * .bss (Uninitialized data) -> MOVED TO RAM_D1 
+   * This solves the overflow. RAM_D1 is 320KB, plenty of space.
+   */
   . = ALIGN(4);
   .bss :
   {
@@ -98,8 +113,9 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;
     __bss_end__ = _ebss;
-  } >RAM
+  } >RAM_D1
 
+  /* User Heap/Stack check -> MOVED TO RAM_D1 to follow .bss */
   ._user_heap_stack :
   {
     . = ALIGN(8);
@@ -108,7 +124,31 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >RAM
+  } >RAM_D1
+
+  /* 
+   * Ethernet Descriptors MUST go to RAM_D2.
+   * We will configure MPU to make RAM_D2 UNCACHEABLE.
+   * This prevents DMA coherency issues.
+   */
+  .RxDescripSection (NOLOAD) : { 
+    . = ALIGN(4);
+    *(.RxDescripSection) 
+  } > RAM_D2
+  
+  .TxDescripSection (NOLOAD) : { 
+    . = ALIGN(4);
+    *(.TxDescripSection) 
+  } > RAM_D2
+
+  /* 
+   * Ethernet Buffers/Pools can stay in RAM_D1.
+   * The STM32HAL driver handles Cache Invalidation for buffers.
+   */
+  .Rx_PoolSection (NOLOAD) : { 
+    . = ALIGN(32);
+    *(.Rx_PoolSection) 
+  } > RAM_D1
 
   /DISCARD/ :
   {
@@ -118,5 +158,4 @@ SECTIONS
   }
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
-
 }

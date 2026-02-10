@@ -3,6 +3,7 @@
 #include "clock.hpp"
 #include "config.hpp"
 #include "encoder.hpp"
+#include "ethernet.hpp"
 #include "stepper.hpp"
 
 extern "C" {
@@ -146,5 +147,10 @@ void EXTI15_10_IRQHandler(void) {
     HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
     HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_14);
     HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);
+}
+
+void ETH_IRQHandler(void) {
+    ethernet::irq_handler();
+    return;
 }
 }

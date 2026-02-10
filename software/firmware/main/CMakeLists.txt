@@ -56,6 +56,7 @@ set(HAL_COMPONENTS
     SPI
     DMA
     UART
+    ETH
 )
 set(HAL_EXTENSIONS
     RCCEx

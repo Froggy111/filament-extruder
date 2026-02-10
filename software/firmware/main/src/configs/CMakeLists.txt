@@ -14,6 +14,7 @@ PUBLIC
     configs/indicator.hpp
     configs/thermistor.hpp
     configs/spooler.hpp
+    configs/ethernet.hpp
 
     configs/encoder.hpp
     configs/encoder/ABZ.hpp

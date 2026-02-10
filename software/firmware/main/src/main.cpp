@@ -11,6 +11,7 @@
 #include "debug.hpp"
 #include "encoder.hpp"
 #include "error.hpp"
+#include "ethernet.hpp"
 #include "fan_ssr.hpp"
 #include "gpio.hpp"
 #include "indicator.hpp"
@@ -22,6 +23,7 @@
 #include "usb.hpp"
 
 void main_task(void *args);
+void blink_task(void *args);
 
 gpio::PinConfig LED = {GPIOA, gpio::Pin::PIN15, gpio::AF::NONE};
 
@@ -61,7 +63,7 @@ void main_task([[maybe_unused]] void *args) {
     gpio::write(LED, 1);
     usb::init();
 
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(2000));
 
     indicator::init();
 
@@ -155,6 +157,14 @@ void main_task([[maybe_unused]] void *args) {
         error::handler();
     }
 
+    debug::log("initialising ethernet");
+    // vTaskDelay(2000);
+    if (!ethernet::init()) {
+        debug::error("ethernet init unsuccessful");
+        vTaskDelay(5000);
+        error::handler();
+    }
+
     // if (!fan_ssr::enable_port(fan_ssr::Port::P5)) {
     //     debug::error("FAN/SSR enable port error");
     //     vTaskDelay(5000);
@@ -169,6 +179,11 @@ void main_task([[maybe_unused]] void *args) {
     // spooler::init();
     // spooler::start();
 
+    xTaskCreate(blink_task, "blink task", 512, NULL, 1, NULL);
+    vTaskDelete(NULL);
+}
+
+void blink_task([[maybe_unused]] void *args) {
     float duty_cycle = 0.0f;
     bool up = true;
     for (;;) {
@@ -187,7 +202,7 @@ void main_task([[maybe_unused]] void *args) {
         gpio::invert(LED);
         // fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 0.0f);
         // HAL_Delay(1);
-        debug::debug("Hello World!");
+        // debug::debug("Hello World!");
         // int64_t encoder_reading = encoder::get_count();
         // debug::log("encoder count: %lld", encoder_reading);
         // float indicator_reading = indicator::read();

@@ -8,6 +8,7 @@
 #include "configs/clock.hpp"
 #include "configs/debug.hpp"
 #include "configs/encoder.hpp"
+#include "configs/ethernet.hpp"
 #include "configs/fan_ssr.hpp"
 #include "configs/indicator.hpp"
 #include "configs/motor.hpp"
