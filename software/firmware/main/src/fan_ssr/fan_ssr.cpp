@@ -82,6 +82,7 @@ bool freq_in_range(fan_ssr::Mode mode, float freq) {
                 return true;
             break;
     }
+    return false;
 }
 
 uint32_t get_timer_clock(TIM_TypeDef* timer);

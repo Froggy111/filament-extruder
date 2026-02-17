@@ -745,6 +745,7 @@ uint16_t usteps_to_val(stepper::MicroSteps usteps) {
             return 1;
             break;
     }
+    return 1;
 }
 
 bool init_timer(uint8_t idx) {

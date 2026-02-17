@@ -6,13 +6,16 @@
 #include <stm32h7xx_hal.h>
 
 #include "configs/clock.hpp"
+#include "configs/cooling.hpp"
 #include "configs/debug.hpp"
 #include "configs/encoder.hpp"
 #include "configs/ethernet.hpp"
-#include "configs/fan_ssr.hpp"
+#include "configs/fan_ssr_.hpp"
+#include "configs/heaters.hpp"
 #include "configs/indicator.hpp"
 #include "configs/motor.hpp"
 #include "configs/peripherals.hpp"
+#include "configs/puller.hpp"
 #include "configs/spooler.hpp"
 #include "configs/stepper_.hpp"
-#include "configs/thermistor.hpp"
+#include "configs/thermistor_.hpp"

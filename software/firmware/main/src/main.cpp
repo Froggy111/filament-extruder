@@ -14,9 +14,11 @@
 #include "ethernet.hpp"
 #include "fan_ssr.hpp"
 #include "gpio.hpp"
+#include "heaters.hpp"
 #include "indicator.hpp"
 #include "motor.hpp"
 #include "mpu.hpp"
+#include "puller.hpp"
 #include "spooler.hpp"
 #include "stepper.hpp"
 #include "thermistor.hpp"
@@ -26,22 +28,6 @@ void main_task(void *args);
 void blink_task(void *args);
 
 gpio::PinConfig LED = {GPIOA, gpio::Pin::PIN15, gpio::AF::NONE};
-
-stepper::Config stepper1_conf = {250000,
-                                 20,
-                                 200,
-                                 stepper::MicroSteps::MS32,
-                                 stepper::Direction::NONINVERTED,
-                                 0.1f,
-                                 0.1f,
-                                 stepper::ChopperMode::spreadcycle,
-                                 300.0f,
-                                 false,
-                                 0,
-                                 10000.0f,
-                                 0.0f,
-                                 0.0f};
-stepper::Config stepper2_conf = stepper1_conf;
 
 int main(void) {
     mpu::init();
@@ -68,8 +54,8 @@ void main_task([[maybe_unused]] void *args) {
     indicator::init();
 
     fan_ssr::InitStatus fan_ssr_init_status =
-        fan_ssr::init(fan_ssr::Mode::FAN, 50.0f, fan_ssr::Mode::FAN, 50.0f,
-                      fan_ssr::Mode::FAN, 50.0f, 0.25f);
+        fan_ssr::init(fan_ssr::Mode::SSR, HEATER_PID_FREQ, fan_ssr::Mode::SSR,
+                      1.0f, fan_ssr::Mode::FAN, 50.0f, 0.25f);
     switch (fan_ssr_init_status) {
         case fan_ssr::InitStatus::BLOCK1_FREQ_OUT_OF_RANGE:
         case fan_ssr::InitStatus::BLOCK2_FREQ_OUT_OF_RANGE:
@@ -104,7 +90,7 @@ void main_task([[maybe_unused]] void *args) {
     }
 
     stepper::InitStatus stepper_init_status =
-        stepper::init(stepper1_conf, SPOOLER_STEPPER_CONF);
+        stepper::init(SPOOLER_STEPPER_CONF, PULLER_STEPPER_CONF);
     switch (stepper_init_status) {
         case stepper::InitStatus::OK:
             debug::debug("stepper initialisation successful");
@@ -157,6 +143,15 @@ void main_task([[maybe_unused]] void *args) {
         error::handler();
     }
 
+    debug::log("initialising heaters");
+    heaters::init();
+
+    debug::log("initialising puller");
+    puller::init();
+
+    debug::log("initialising spooler");
+    spooler::init();
+
     debug::log("initialising ethernet");
     // vTaskDelay(2000);
     if (!ethernet::init()) {
@@ -184,41 +179,8 @@ void main_task([[maybe_unused]] void *args) {
 }
 
 void blink_task([[maybe_unused]] void *args) {
-    float duty_cycle = 0.0f;
-    bool up = true;
     for (;;) {
-        if (up) {
-            duty_cycle += 0.01f;
-        } else {
-            duty_cycle -= 0.01f;
-        }
-        if (duty_cycle > 0.2f) {
-            duty_cycle -= 0.01f;
-            up = false;
-        } else if (duty_cycle < -0.2f) {
-            duty_cycle += 0.01f;
-            up = true;
-        }
         gpio::invert(LED);
-        // fan_ssr::set_duty_cycle(fan_ssr::Port::P5, 0.0f);
-        // HAL_Delay(1);
-        // debug::debug("Hello World!");
-        // int64_t encoder_reading = encoder::get_count();
-        // debug::log("encoder count: %lld", encoder_reading);
-        // float indicator_reading = indicator::read();
-        // debug::log("indicator reading: %f", indicator_reading);
-        // uint32_t start_cycles = DWT->CYCCNT;
-        // float thermistor_reading = thermistor::read(thermistor::Port::P1);
-        // uint32_t end_cycles = DWT->CYCCNT;
-        // uint32_t total_cycles = end_cycles - start_cycles;
-        // uint32_t cpu_freq = HAL_RCC_GetSysClockFreq();
-        // float time_us = ((float)total_cycles * 1.0e6f) / cpu_freq;
-        // debug::log("thermistor reading: %f, time taken: %fus, cpu freq: %u",
-        //            thermistor_reading, time_us, cpu_freq);
-        // motor::set_duty_cycle(0.49f);
-        // stepper::set_angular_velocity(stepper::Port::P1, duty_cycle
-        // / 5.0f); stepper::set_angular_velocity(stepper::Port::P2,
-        // duty_cycle);
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

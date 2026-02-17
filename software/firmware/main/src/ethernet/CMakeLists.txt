@@ -4,6 +4,8 @@ target_sources(ethernet
 PRIVATE
    ethernet.cpp
    ethernetif.c
+   webpage.hpp
+   webpage.cpp
 PUBLIC
     include/ethernet.hpp
     include/ethernetif.h
@@ -22,4 +24,9 @@ PUBLIC
     error
     debug
     LWIP
+    thermistor
+    gpio
+    heaters
+    puller
+    spooler
 )

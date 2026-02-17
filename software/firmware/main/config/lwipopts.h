@@ -139,7 +139,7 @@
    ---------- Socket options ----------
    ------------------------------------
 */
-#define LWIP_SOCKET 0
+#define LWIP_SOCKET 1
 
 /*
    ------------------------------------
@@ -157,6 +157,7 @@
 #define LWIP_HTTPD 1
 #define LWIP_HTTPD_CGI 1
 #define LWIP_HTTPD_SSI 1
+#define HTTPD_SERVER_PORT 80
 #define HTTPD_USE_CUSTOM_FSDATA 0
 
 /* Debugging off for performance */

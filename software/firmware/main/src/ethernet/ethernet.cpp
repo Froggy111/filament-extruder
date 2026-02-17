@@ -1,15 +1,20 @@
 #include "ethernet.hpp"
 
 #include <FreeRTOS.h>
+#include <lwip/api.h>
 #include <lwip/netif.h>
 #include <lwip/tcpip.h>
 #include <stm32h7xx_hal.h>
+#include <string.h>
 #include <task.h>
 
 #include "config.hpp"
 #include "debug.hpp"
+#include "error.hpp"
 #include "ethernetif.h"
 #include "gpio.hpp"
+#include "thermistor.hpp"
+#include "webpage.hpp"
 
 extern "C" {
 ETH_HandleTypeDef eth_handle;
@@ -24,7 +29,7 @@ ETH_DMADescTypeDef DMARxDscrTab[ETH_RX_DESC_CNT]
 ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT]
     __attribute__((section(".TxDescripSection"), aligned(32)));
 
-void network_task(void* args);
+void network_task(void *args);
 
 bool ethernet::init(void) {
     __HAL_RCC_ETH1MAC_CLK_ENABLE();
@@ -79,7 +84,7 @@ void ethernet::irq_handler(void) {
     return;
 }
 
-void network_task([[maybe_unused]] void* args) {
+void network_task([[maybe_unused]] void *args) {
     tcpip_init(NULL, NULL);
 
     debug::debug("Waiting for Ethernet PHY link...");
@@ -126,6 +131,16 @@ void network_task([[maybe_unused]] void* args) {
     } else {
         debug::error("MAC is in Half Duplex!");
     }
+
+    vTaskDelay(100);
+    BaseType_t status =
+        xTaskCreate(http_server_task, "http server", 8192, NULL, 1, NULL);
+    if (status != pdPASS) {
+        debug::error("http task creation failed");
+        vTaskDelay(5000);
+        error::handler();
+    }
+    debug::debug("created http task");
 
     for (;;) {
         vTaskDelay(1000);

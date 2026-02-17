@@ -12,7 +12,6 @@
 static int64_t encoder_count = 0;
 static float position = 0;
 static bool running = false;
-static TickType_t wake_tick = 0;
 
 void spooler_task(void* args);
 inline bool front_endstop_triggered(void) {
@@ -60,16 +59,20 @@ void spooler::stop(void) {
     motor::set_duty_cycle(0.0f);
 }
 
+bool spooler::is_running(void) { return running; }
+
+float spooler::get_position(void) { return position; }
+
 const float DIST_PER_ENCODER_COUNT = 1.75f / (float)ENCODER_RESOLUTION;
 const float LOOPS_PER_ROUND = SPOOL_WIDTH / 1.75f;
 const uint32_t ENCODER_COUNTS_PER_LAYER =
     (uint32_t)((float)ENCODER_RESOLUTION * LOOPS_PER_ROUND);
 const int64_t period = 2 * (int64_t)ENCODER_COUNTS_PER_LAYER;
 void spooler_task([[maybe_unused]] void* args) {
+    TickType_t wake_tick = xTaskGetTickCount();
     for (;;) {
         if (!running) {
             vTaskDelayUntil(&wake_tick, pdMS_TO_TICKS(1));
-            wake_tick = xTaskGetTickCount();
             continue;
         }
         encoder_count = encoder::get_count();

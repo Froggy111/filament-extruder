@@ -3,16 +3,16 @@
 #include "gpio.hpp"
 #include "stepper.hpp"
 
-const gpio::PinConfig SPOOLER_BACK_ENDSTOP = {GPIOA, gpio::Pin::PIN10,
+const gpio::PinConfig SPOOLER_BACK_ENDSTOP = {GPIOG, gpio::Pin::PIN3,
                                               gpio::AF::NONE};
-const gpio::PinConfig SPOOLER_FRONT_ENDSTOP = {GPIOA, gpio::Pin::PIN9,
+const gpio::PinConfig SPOOLER_FRONT_ENDSTOP = {GPIOA, gpio::Pin::PIN10,
                                                gpio::AF::NONE};
-const stepper::Port SPOOLER_STEPPER = stepper::Port::P2;
+const stepper::Port SPOOLER_STEPPER = stepper::Port::P1;
 const float SPOOLER_PITCH = 1.0f;   // in mm
 const float SPOOL_WIDTH = 60.0f;    // in mm
 const float SPOOLER_OFFSET = 5.0f;  // in mm
 const stepper::Config SPOOLER_STEPPER_CONF = {250000,
-                                              1,
+                                              SPOOLER_PITCH,
                                               200,
                                               stepper::MicroSteps::MS32,
                                               stepper::Direction::NONINVERTED,

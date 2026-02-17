@@ -13,6 +13,9 @@ indicator
 thermistor
 spooler
 ethernet
+heaters
+puller
+cooling
 )
 
 add_subdirectory(configs)
@@ -34,6 +37,9 @@ add_subdirectory(indicator)
 add_subdirectory(thermistor)
 add_subdirectory(spooler)
 add_subdirectory(ethernet)
+add_subdirectory(heaters)
+add_subdirectory(puller)
+add_subdirectory(cooling)
 
 set(TARGET_NAME "${PROJECT_NAME}-${MCU_SERIES}")
 add_executable(${TARGET_NAME})
